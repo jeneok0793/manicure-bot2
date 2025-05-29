@@ -2,3 +2,4 @@ aiogram==3.10.0
 aiohttp
 gspread
 google-auth
+python-dotenv
