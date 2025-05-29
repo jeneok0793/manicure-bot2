@@ -4,9 +4,16 @@ from aiogram.filters import CommandStart
 router = Router()
 
 @router.message(CommandStart())
-async def start_handler(message: types.Message):
-    await message.answer("Привет! Я бот для записи. Напиши 'записаться', чтобы начать!")
+async def handle_start(message: types.Message):
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=[
+            [types.KeyboardButton(text="📝 Записаться"), types.KeyboardButton(text="📅 Мои записи")],
+            [types.KeyboardButton(text="❌ Отменить запись")]
+        ],
+        resize_keyboard=True
+    )
+    await message.answer(
+        "Привет! 💅 Я помогу тебе записаться на маникюр.\nВыбери, что хочешь сделать:",
+        reply_markup=keyboard
+    )
 
-@router.message()
-async def fallback_handler(message: types.Message):
-    await message.answer("Я пока не понял тебя 😅 Напиши 'записаться' — и я всё расскажу.")
