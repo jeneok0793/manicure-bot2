@@ -1,61 +1,73 @@
-import json
 import gspread
-from google.oauth2.service_account import Credentials
+import json
 import os
+from google.oauth2.service_account import Credentials
 
-# Путь к секретному JSON-файлу от сервисного аккаунта
+# Чтение ключа из секрета Render
 SERVICE_ACCOUNT_FILE = "/etc/secrets/service_account.json"
 
-# ID таблицы из Google Sheets
-SPREADSHEET_ID = "16gIFFCTsBHxFaRI6uNAoQCehMey2IbGddHlcY3XxICY"
+with open(SERVICE_ACCOUNT_FILE, "r") as f:
+    data = json.load(f)
 
-# Названия листов
-SHEET_NAMES = {
-    "clients": "clients",
-    "slots": "slots",
-    "admins": "admins",
-}
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
+credentials = Credentials.from_service_account_info(data, scopes=SCOPES)
 
-# Авторизация
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive"
-]
-credentials = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
 client = gspread.authorize(credentials)
 
-# Получить таблицу
-def get_spreadsheet_by_id():
-    return client.open_by_key(SPREADSHEET_ID)
+# ID таблицы из переменной окружения
+GOOGLE_SHEET_ID = os.getenv("GOOGLE_SHEET_ID")
+sheet = client.open_by_key(GOOGLE_SHEET_ID)
 
-# Получить лист
-def get_worksheet(spreadsheet, sheet_name):
-    return spreadsheet.worksheet(sheet_name)
+def get_worksheet(sheet, sheet_name):
+    """Возвращает лист по имени"""
+    return sheet.worksheet(sheet_name)
 
-# Получить все записи из листа
 def get_all_records(sheet_name):
-    spreadsheet = get_spreadsheet_by_id()
-    worksheet = get_worksheet(spreadsheet, sheet_name)
-    return worksheet.get_all_records()
+    """Получает все записи с листа"""
+    return get_worksheet(sheet, sheet_name).get_all_records()
 
-# Добавить запись
-def add_record(sheet_name, data):
-    spreadsheet = get_spreadsheet_by_id()
-    worksheet = get_worksheet(spreadsheet, sheet_name)
-    worksheet.append_row(list(data.values()))
+def get_column_values(sheet_name, column_name):
+    """Получает все значения из указанного столбца"""
+    worksheet = get_worksheet(sheet, sheet_name)
+    data = worksheet.get_all_records()
+    return [row[column_name] for row in data if column_name in row]
 
-# Найти запись по ключу
 def find_record(sheet_name, key_column, key_value):
-    records = get_all_records(sheet_name)
-    for record in records:
-        if str(record.get(key_column)) == str(key_value):
-            return record
+    """Ищет запись по значению в ключевом столбце"""
+    data = get_all_records(sheet_name)
+    for row in data:
+        if str(row.get(key_column)) == str(key_value):
+            return row
     return None
 
-# Обновить запись
-def update_record(sheet_name, key_column, key_value, new_data):
-    spreadsheet = get_spreadsheet_by_id()
-    worksheet = get_worksheet(spreadsheet, sheet_name)
-    all_data = worksheet.get_all_values()
-    headers = all_data[0]
-    for idx, row in enumerate(all ​:contentReference[oaicite:0]{index=0}​
+def add_record(sheet_name, record_dict):
+    """Добавляет запись"""
+    worksheet = get_worksheet(sheet, sheet_name)
+    worksheet.append_row([record_dict.get(col, "") for col in worksheet.row_values(1)])
+
+def update_record(sheet_name, key_column, key_value, new_data_dict):
+    """Обновляет строку, в которой ключевое значение совпадает"""
+    worksheet = get_worksheet(sheet, sheet_name)
+    data = worksheet.get_all_records()
+    headers = worksheet.row_values(1)
+
+    for idx, row in enumerate(data):
+        if str(row.get(key_column)) == str(key_value):
+            row_index = idx + 2  # +1 за заголовок, +1 за смещение
+            for col, value in new_data_dict.items():
+                if col in headers:
+                    col_index = headers.index(col) + 1
+                    worksheet.update_cell(row_index, col_index, value)
+            break
+
+def format_date_for_client(date_str):
+    """Форматирует YYYY-MM-DD в ДД.ММ"""
+    try:
+        parts = date_str.split("-")
+        return f"{parts[2]}.{parts[1]}"
+    except Exception:
+        return date_str
+
+def get_spreadsheet_by_id():
+    """Возвращает объект Google Spreadsheet"""
+    return client.open_by_key(GOOGLE_SHEET_ID)
