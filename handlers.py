@@ -1,19 +1,13 @@
+# handlers.py
+
 from aiogram import Router, types
-from aiogram.filters import CommandStart
+from config import ADMIN_CHAT_ID
 
 router = Router()
 
-@router.message(CommandStart())
-async def handle_start(message: types.Message):
-    keyboard = types.ReplyKeyboardMarkup(
-        keyboard=[
-            [types.KeyboardButton(text="📝 Записаться"), types.KeyboardButton(text="📅 Мои записи")],
-            [types.KeyboardButton(text="❌ Отменить запись")]
-        ],
-        resize_keyboard=True
-    )
-    await message.answer(
-        "Привет! 💅 Я помогу тебе записаться на маникюр.\nВыбери, что хочешь сделать:",
-        reply_markup=keyboard
-    )
-
+@router.message(commands=["start"])
+async def start_handler(message: types.Message):
+    if message.from_user.id == ADMIN_CHAT_ID:
+        await message.answer("Добро пожаловать, админ!")
+    else:
+        await message.answer("Привет! Я бот для записи 🧴💅")
