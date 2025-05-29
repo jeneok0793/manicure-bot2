@@ -1,8 +1,6 @@
-BOT_TOKEN = "7734245556:AAGRe6U8NekBIwgeThApd4HGw4WcxxHdWyU"
-WEBHOOK_URL = "https://manicure-bot2.onrender.com"
-GOOGLE_SHEET_ID = "1Sk3XGVrTgiWy9vQ-Acnog1LscsFZoU5CO5RHqxL8oLs"
+# config.py
+
+BOT_TOKEN = "8167865893:AAGgIoko_RGN0G0YOhjnXMfQYy6WCosY7w8"
+GOOGLE_SHEET_ID = "16gIFFCTsBHxFaRI6uNAoQCehMey2IbGddHlcY3XxICY"
 ADMIN_CHAT_ID = 7185312775
 TIMEZONE = "Europe/Chisinau"
-SERVICE_ACCOUNT_FILE = "service_account.json"
-
-
