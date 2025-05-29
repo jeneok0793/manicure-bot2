@@ -1,13 +1,9 @@
-# handlers.py
-
 from aiogram import Router, types
-from config import ADMIN_CHAT_ID
+from aiogram.filters import CommandStart
+from aiogram.types import Message
 
 router = Router()
 
-@router.message(commands=["start"])
-async def start_handler(message: types.Message):
-    if message.from_user.id == ADMIN_CHAT_ID:
-        await message.answer("Добро пожаловать, админ!")
-    else:
-        await message.answer("Привет! Я бот для записи 🧴💅")
+@router.message(CommandStart())
+async def start_handler(message: Message):
+    await message.answer("Привет! Я бот для записи на маникюр 💅\nВыбери действие из меню ниже или напиши команду.")
